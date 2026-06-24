@@ -1,45 +1,55 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi UTBK 2026</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<div class="quiz-container">
+    <header>
+        <h1>Simulasi UTBK - TPS</h1>
+        <div id="timer">Waktu: <span id="time">02:00</span></div>
+    </header>
+    <hr>
 
-    <div class="quiz-container">
-        <header>
-            <h1>Simulasi UTBK - Tes Potensi Skolastik</h1>
-            <div id="timer">Waktu: <span id="time">02:00</span></div>
-        </header>
+    <!-- Bungkus baru untuk membagi Layout menjadi Konten & Sidebar -->
+    <div class="main-layout">
+        
+        <!-- SISI KIRI: Area Soal (Lebih Luas) -->
+        <div class="quiz-content">
+            <div id="quiz-box">
+                <div class="question-header">
+                    <span class="question-number">Soal No. <span id="q-num">1</span></span>
+                    <!-- Tombol Ragu-Ragu -->
+                    <label class="doubtful-container">
+                        <input type="checkbox" id="doubtful-checkbox" onchange="toggleDoubtful()"> Ragu-Ragu
+                    </label>
+                </div>
+                
+                <p id="question-text">Loading soal...</p>
 
-        <hr>
-
-        <div id="quiz-box">
-            <div class="question-number">Soal No. <span id="q-num">1</span></div>
-            <p id="question-text">Loading soal...</p>
-
-            <div class="options-container">
-                <button class="option-btn" onclick="checkAnswer(0)">A. <span id="optA"></span></button>
-                <button class="option-btn" onclick="checkAnswer(1)">B. <span id="optB"></span></button>
-                <button class="option-btn" onclick="checkAnswer(2)">C. <span id="optC"></span></button>
-                <button class="option-btn" onclick="checkAnswer(3)">D. <span id="optD"></span></button>
+                <div class="options-container">
+                    <button class="option-btn" id="btn-0" onclick="selectAnswer(0)">A. <span id="optA"></span></button>
+                    <button class="option-btn" id="btn-1" onclick="selectAnswer(1)">B. <span id="optB"></span></button>
+                    <button class="option-btn" id="btn-2" onclick="selectAnswer(2)">C. <span id="optC"></span></button>
+                    <button class="option-btn" id="btn-3" onclick="selectAnswer(3)">D. <span id="optD"></span></button>
+                </div>
             </div>
+
+            <!-- Area Hasil -->
+            <div id="result-box" class="hidden">
+                <h2>Ujian Selesai!</h2>
+                <h1 id="score-text">0</h1>
+                <button onclick="location.reload()" class="action-btn">Ulangi Ujian</button>
+            </div>
+
+            <footer id="quiz-footer">
+                <button id="prev-btn" class="nav-btn" onclick="prevQuestion()">Sebelumnya</button>
+                <button id="next-btn" class="action-btn" onclick="nextQuestion()">Selanjutnya</button>
+            </footer>
         </div>
 
-        <div id="result-box" class="hidden">
-            <h2>Ujian Selesai!</h2>
-            <p>Skor IRT / Nilai Anda:</p>
-            <h1 id="score-text">0</h1>
-            <button onclick="location.reload()" class="action-btn">Ulangi Ujian</button>
+        <!-- SISI KANAN: Grid Nomor Soal (Sidebar) -->
+        <div class="sidebar" id="sidebar-container">
+            <h3>Navigasi Soal</h3>
+            <div class="question-grid" id="question-grid">
+                <!-- Nomor soal akan di-generate otomatis oleh JavaScript -->
+            </div>
+            <button onclick="endQuiz()" class="finish-btn">Selesai Ujian</button>
         </div>
 
-        <footer id="quiz-footer">
-            <button id="next-btn" class="action-btn" onclick="nextQuestion()">Next Soal</button>
-        </footer>
     </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+</div>
