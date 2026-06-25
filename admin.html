@@ -5,224 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - SIM UTBK</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Load Chart.js untuk Fitur Bisnis Cerdas (BI) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<div class="container admin-container">
+<div class="container">
     <header>
         <h1>PANEL KONTROL ADMIN - SIM UTBK</h1>
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Lihat Halaman Ujian</button>
+        <button class="btn btn-secondary" onclick="window.location.href='login.html'">Ke Halaman Login</button>
     </header>
 
-    <!-- ROW 1: KARTU INFORMASI UTAMA (BI STATS) -->
     <div class="stats-grid">
-        <div class="card bg-blue">
-            <h3>Total Peserta</h3>
-            <h2 id="stat-total">4</h2>
-        </div>
-        <div class="card bg-green">
-            <h3>Rata-rata Skor</h3>
-            <h2 id="stat-avg">550</h2>
-        </div>
-        <div class="card bg-yellow">
-            <h3>Sedang Ujian</h3>
-            <h2 id="stat-active">0</h2>
-        </div>
+        <div class="card bg-blue"><h3>Total Peserta</h3><h2 id="stat-total">0</h2></div>
+        <div class="card bg-green"><h3>Rata-rata Skor</h3><h2 id="stat-avg">0</h2></div>
+        <div class="card bg-yellow"><h3>Status Sistem</h3><h2>Lokal (OK)</h2></div>
     </div>
 
     <div class="main-layout">
-        <!-- SISI KIRI: MANAJEMEN DATA PESERTA (CRUD) -->
         <div class="quiz-section">
             <h2>Kelola Akun Peserta</h2>
-            
-            <!-- Form Tambah Peserta -->
             <div class="form-box">
                 <input type="text" id="input-nama" placeholder="Nama Lengkap">
                 <input type="text" id="input-username" placeholder="Username">
                 <input type="password" id="input-password" placeholder="Password">
-                <button class="btn btn-primary" onclick="tambahPesertaLocal()">Tambah Peserta</button>
+                <button class="btn btn-primary" onclick="tambahPesertaLocal()">Tambah</button>
             </div>
 
-            <!-- Tabel Daftar Peserta -->
             <table class="admin-table">
                 <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Peserta</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>Skor</th>
-                        <th>Aksi</th>
-                    </tr>
+                    <tr><th>No</th><th>Nama Peserta</th><th>Username</th><th>Password</th><th>Skor</th><th>Aksi</th></tr>
                 </thead>
-                <tbody id="tabel-peserta-body">
-                    <!-- Data akan di-render oleh JavaScript -->
-                </tbody>
+                <tbody id="tabel-peserta-body"></tbody>
             </table>
         </div>
 
-        <!-- SISI KANAN: GRAFIK BI (VISUALISASI DATA) -->
-        <div class="sidebar admin-sidebar">
-            <h3>Analisis Nilai</h3>
-            <div class="chart-container">
-                <canvas id="biChart"></canvas>
-            </div>
+        <div class="sidebar">
+            <h3>Analisis Nilai (BI)</h3>
+            <div style="height: 250px; position: relative;"><canvas id="biChart"></canvas></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- JAVASCRIPT LOKAL UNTUK MOCKUP DATA ADMIN ---
-    
- // ==========================================
-// 1. STRUKTUR DATA & DATABASE LOKAL (localStorage)
-// ==========================================
+    // Ambil database dari localStorage, jika belum ada buat data default termasuk akun 'eko'
+    let dataPeserta = JSON.parse(localStorage.getItem("dataPeserta")) || [
+        { nama: "Budi Santoso", user: "budi123", pass: "rahasia", skor: 750 },
+        { nama: "Eko Prasetyo", user: "eko", pass: "123", skor: 0 }
+    ];
 
-// Mengambil data dari localStorage saat load awal. 
-// Jika localStorage masih kosong, gunakan data dummy awal sebagai contoh.
-let dataPeserta = JSON.parse(localStorage.getItem("dataPeserta")) || [
-    { nama: "Budi Santoso", user: "budi123", pass: "rahasia", skor: 750 },
-    { nama: "Siti Aminah", user: "siti2026", pass: "utbk26", skor: 500 },
-    { nama: "Rian Hidayat", user: "rianhd", pass: "pass123", skor: 250 },
-    { nama: "Alya Putri", user: "alyap", pass: "putri99", skor: 700 }
-];
+    function renderTabel() {
+        const tbody = document.getElementById("tabel-peserta-body");
+        tbody.innerHTML = "";
+        let totalSkor = 0;
 
-// ==========================================
-// 2. FUNGSI UTAMA & MANAJEMEN DATA (CRUD)
-// ==========================================
+        dataPeserta.forEach((p, indeks) => {
+            totalSkor += p.skor;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${indeks + 1}</td>
+                    <td><b>${p.nama}</b></td>
+                    <td><code>${p.user}</code></td>
+                    <td>••••••</td>
+                    <td><span class="badge-skor">${p.skor}</span></td>
+                    <td><button class="btn-del" onclick="hapusPeserta(${indeks})">Hapus</button></td>
+                </tr>`;
+        });
 
-/**
- * Menampilkan dan memperbarui data peserta ke dalam tabel HTML
- * serta mengalkulasi metrik Bisnis Cerdas (BI) di kartu statistik.
- */
-function renderTabel() {
-    const tbody = document.getElementById("tabel-peserta-body");
-    tbody.innerHTML = ""; // Bersihkan tabel sebelum me-render ulang
-    
-    let totalSkor = 0;
-
-    // Loop data peserta untuk dimasukkan ke dalam baris tabel
-    dataPeserta.forEach((p, indeks) => {
-        totalSkor += p.skor;
-        const row = `
-            <tr>
-                <td>${indeks + 1}</td>
-                <td><b>${p.nama}</b></td>
-                <td><code>${p.user}</code></td>
-                <td>••••••</td>
-                <td><span class="badge-skor">${p.skor}</span></td>
-                <td>
-                    <button class="btn-action btn-del" onclick="hapusPeserta(${indeks})">Hapus</button>
-                </td>
-            </tr>
-        `;
-        tbody.innerHTML += row;
-    });
-
-    // --- INTEGRASI BISNIS CERDAS (BI STATS) ---
-    // Update Angka Total Peserta
-    document.getElementById("stat-total").innerText = dataPeserta.length;
-    
-    // Hitung Rata-rata Skor Nasional secara otomatis
-    let avg = dataPeserta.length > 0 ? Math.round(totalSkor / dataPeserta.length) : 0;
-    document.getElementById("stat-avg").innerText = avg;
-
-    // --- SINKRONISASI PERMANEN ---
-    // Simpan setiap ada perubahan (tambah/hapus/update skor) ke localStorage browser
-    localStorage.setItem("dataPeserta", JSON.stringify(dataPeserta));
-    
-    // Perbarui visualisasi grafik batang
-    updateGrafik();
-}
-
-/**
- * Menambahkan peserta baru dari form input admin ke database lokal
- */
-function tambahPesertaLocal() {
-    const nama = document.getElementById("input-nama").value;
-    const user = document.getElementById("input-username").value;
-    const pass = document.getElementById("input-password").value;
-
-    // Validasi: Pastikan semua kolom form sudah terisi
-    if (nama && user && pass) {
-        // Masukkan data baru ke dalam array dengan skor default awal = 0
-        dataPeserta.push({ nama: nama, user: user, pass: pass, skor: 0 });
+        document.getElementById("stat-total").innerText = dataPeserta.length;
+        document.getElementById("stat-avg").innerText = dataPeserta.length > 0 ? Math.round(totalSkor / dataPeserta.length) : 0;
         
-        // Render ulang tabel agar data baru langsung muncul
-        renderTabel();
-        
-        // Reset/Kosongkan kembali form input setelah berhasil menambahkan
-        document.getElementById("input-nama").value = "";
-        document.getElementById("input-username").value = "";
-        document.getElementById("input-password").value = "";
-    } else {
-        alert("Harap isi semua kolom formulir!");
-    }
-}
-
-/**
- * Menghapus data peserta berdasarkan indeks barisnya
- * @param {number} indeks - Posisi array data peserta yang akan dihapus
- */
-function hapusPeserta(indeks) {
-    if (confirm("Apakah Anda yakin ingin menghapus peserta ini?")) {
-        dataPeserta.splice(indeks, 1); // Hapus 1 item dari array
-        renderTabel(); // Render ulang tabel dan perbarui grafik
-    }
-}
-
-// ==========================================
-// 3. INTEGRASI CHART.JS (BUSINESS INTELLIGENCE)
-// ==========================================
-let grafikSaya;
-
-/**
- * Membentuk dan memperbarui visualisasi grafik batang Chart.js secara dinamis
- */
-function updateGrafik() {
-    const ctx = document.getElementById('biChart').getContext('2d');
-    
-    // Ekstrak nama dan skor dari array dataPeserta untuk dijadikan sumbu X dan Y grafik
-    const labelNama = dataPeserta.map(p => p.nama);
-    const nilaiSkor = dataPeserta.map(p => p.skor);
-
-    // Hancurkan (destroy) instance grafik lama jika ada, untuk menghindari tumpang tindih visual saat update data
-    if (grafikSaya) { 
-        grafikSaya.destroy(); 
+        localStorage.setItem("dataPeserta", JSON.stringify(dataPeserta));
+        updateGrafik();
     }
 
-    // Inisialisasi grafik batang baru
-    grafikSaya = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labelNama,
-            datasets: [{
-                label: 'Skor UTBK Peserta',
-                data: nilaiSkor,
-                backgroundColor: '#1e3a8a', // Warna biru tua tema UTBK
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    max: 1000 // Skala maksimal nilai UTBK standar
-                }
-            }
-        }
-    });
-}
+    function tambahPesertaLocal() {
+        const nama = document.getElementById("input-nama").value.trim();
+        const user = document.getElementById("input-username").value.trim();
+        const pass = document.getElementById("input-password").value.trim();
 
-// ==========================================
-// 4. INISIALISASI AWAL APLIKASI
-// ==========================================
-// Jalankan fungsi render tabel pertama kali saat halaman admin selesai dimuat sempurna
-window.onload = renderTabel;
+        if (nama && user && pass) {
+            dataPeserta.push({ nama, user, pass, skor: 0 });
+            renderTabel();
+            document.getElementById("input-nama").value = "";
+            document.getElementById("input-username").value = "";
+            document.getElementById("input-password").value = "";
+        } else { alert("Semua kolom harus diisi!"); }
+    }
+
+    function hapusPeserta(indeks) {
+        if (confirm("Hapus peserta ini?")) { dataPeserta.splice(indeks, 1); renderTabel(); }
+    }
+
+    let grafikSaya;
+    function updateGrafik() {
+        const ctx = document.getElementById('biChart').getContext('2d');
+        if (grafikSaya) grafikSaya.destroy();
+        grafikSaya = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dataPeserta.map(p => p.nama),
+                datasets: [{ label: 'Skor UTBK', data: dataPeserta.map(p => p.skor), backgroundColor: '#1e3a8a' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 1000 } } }
+        });
+    }
+
+    window.onload = renderTabel;
 </script>
 </body>
 </html>

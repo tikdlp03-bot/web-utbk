@@ -3,54 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi UTBK 2026</title>
+    <title>Simulasi Ujian UTBK</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>SIMULASI UTBK - TES POTENSI SKOLASTIK (TPS)</h1>
-        <div id="timer">Sisa Waktu: <span id="time-display">05:00</span></div>
+        <h1>SIMULASI UTBK - TES POTENSI SKOLASTIK</h1>
+        <div id="timer" style="font-weight: bold; font-size: 18px;">Waktu: <span id="time-display">05:00</span></div>
     </header>
 
-    <div class="main-layout" id="quiz-layout">
+    <div id="quiz-layout" class="main-layout">
         <div class="quiz-section">
-            <div class="question-header">
-                <div class="question-num">Soal No. <span id="current-num">1</span></div>
-                <label class="ragu-container">
-                    <input type="checkbox" id="ragu-checkbox" onchange="tentukanRagu()"> Ragu-Ragu
+            <h2>Soal No. <span id="current-num">1</span></h2>
+            <p id="question-text" style="font-size: 18px; line-height: 1.6; margin-bottom: 20px;"></p>
+            
+            <div class="options-container">
+                <div id="opt-0" class="option-item" onclick="pilihJawaban(0)">A. <span id="text-0"></span></div>
+                <div id="opt-1" class="option-item" onclick="pilihJawaban(1)">B. <span id="text-1"></span></div>
+                <div id="opt-2" class="option-item" onclick="pilihJawaban(2)">C. <span id="text-2"></span></div>
+                <div id="opt-3" class="option-item" onclick="pilihJawaban(3)">D. <span id="text-3"></span></div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="btn btn-secondary" onclick="soalSebelumnya()">Sebelumnya</button>
+                <label style="font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="ragu-checkbox" onclick="tentukanRagu()"> Ragu-Ragu
                 </label>
-            </div>
-
-            <p id="question-text">Memuat soal...</p>
-
-            <div class="options-list">
-                <button class="option-btn" id="opt-0" onclick="pilihJawaban(0)">A. <span id="text-0"></span></button>
-                <button class="option-btn" id="opt-1" onclick="pilihJawaban(1)">B. <span id="text-1"></span></button>
-                <button class="option-btn" id="opt-2" onclick="pilihJawaban(2)">C. <span id="text-2"></span></button>
-                <button class="option-btn" id="opt-3" onclick="pilihJawaban(3)">D. <span id="text-3"></span></button>
-            </div>
-
-            <div class="nav-buttons">
-                <button class="btn btn-secondary" id="prev-btn" onclick="soalSebelumnya()">Sebelumnya</button>
-                <button class="btn btn-primary" id="next-btn" onclick="soalBerikutnya()">Selanjutnya</button>
+                <button class="btn btn-primary" onclick="soalBerikutnya()">Selanjutnya</button>
             </div>
         </div>
 
         <div class="sidebar">
-            <h3>Nomor Soal</h3>
-            <div class="grid-container" id="number-grid">
-                </div>
-            <button class="btn btn-danger" onclick="selesaiUjian()">Selesai Ujian</button>
+            <h3 style="margin-top:0;">Navigasi Soal</h3>
+            <div id="number-grid" class="number-grid"></div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 30px; background:#dc2626;" onclick="selesaiUjian()">Selesai Ujian</button>
         </div>
     </div>
 
-    <div id="result-box" class="hidden">
-        <h2>Ujian Telah Selesai!</h2>
-        <p>Terima kasih telah mengikuti simulasi ini. Skor akhir Anda:</p>
-        <h1 id="score-text">0</h1>
-        <button class="btn btn-primary" onclick="location.reload()">Coba Lagi</button>
+    <div id="result-box" class="login-box hidden" style="margin-top: 50px;">
+        <h2 style="color: #16a34a;">UJIAN SELESAI</h2>
+        <p>Terima kasih telah mengikuti simulasi.</p>
+        <h1 style="font-size: 48px; margin: 15px 0;" id="score-text">0</h1>
+        <button class="btn btn-secondary" onclick="window.location.href='login.html'">Kembali ke Login</button>
     </div>
 </div>
 

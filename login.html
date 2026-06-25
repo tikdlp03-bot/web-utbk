@@ -5,27 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Peserta UTBK</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .login-box {
-            max-width: 400px;
-            margin: 100px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .login-box button { width: 100%; padding: 12px; margin-top: 10px; }
-        .error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; display: none; }
-    </style>
 </head>
 <body>
 
@@ -39,21 +18,21 @@
 
 <script>
     function prosesLogin() {
-        const userIn = document.getElementById("login-user").value;
-        const passIn = document.getElementById("login-pass").value;
+        const userIn = document.getElementById("login-user").value.trim();
+        const passIn = document.getElementById("login-pass").value.trim();
         const errorText = document.getElementById("error-text");
 
-        // Ambal data peserta yang didaftarkan admin dari localStorage
+        // Ambil data dari localStorage
         let dataPeserta = JSON.parse(localStorage.getItem("dataPeserta")) || [];
 
-        // Cari apakah ada akun yang cocok
-        const akunCocok = dataPeserta.find(p => p.user === userIn && p.pass === passIn);
+        // Cari akun yang cocok
+        let akunCocok = dataPeserta.find(p => p.user.toLowerCase() === userIn.toLowerCase() && p.pass === passIn);
 
         if (akunCocok) {
-            // Simpan sesi siapa yang login saat ini
+            errorText.style.display = "none";
+            // Simpan sesi user aktif
             localStorage.setItem("pesertaAktif", JSON.stringify(akunCocok));
-            // Alihkan ke halaman ujian
-            window.location.href = "index.html";
+            window.location.href = "index.html"; // Alihkan ke halaman ujian
         } else {
             errorText.style.display = "block";
         }
