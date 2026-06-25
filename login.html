@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Peserta UTBK</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .login-box button { width: 100%; padding: 12px; margin-top: 10px; }
+        .error-msg { color: #ef4444; font-size: 14px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2 style="color: #1e3a8a; margin-bottom: 20px;">LOGIN PESERTA UTBK</h2>
+    <input type="text" id="login-user" placeholder="Masukkan Username">
+    <input type="password" id="login-pass" placeholder="Masukkan Password">
+    <button class="btn btn-primary" onclick="prosesLogin()">Masuk Ujian</button>
+    <p id="error-text" class="error-msg">Username atau Password salah!</p>
+</div>
+
+<script>
+    function prosesLogin() {
+        const userIn = document.getElementById("login-user").value;
+        const passIn = document.getElementById("login-pass").value;
+        const errorText = document.getElementById("error-text");
+
+        // Ambal data peserta yang didaftarkan admin dari localStorage
+        let dataPeserta = JSON.parse(localStorage.getItem("dataPeserta")) || [];
+
+        // Cari apakah ada akun yang cocok
+        const akunCocok = dataPeserta.find(p => p.user === userIn && p.pass === passIn);
+
+        if (akunCocok) {
+            // Simpan sesi siapa yang login saat ini
+            localStorage.setItem("pesertaAktif", JSON.stringify(akunCocok));
+            // Alihkan ke halaman ujian
+            window.location.href = "index.html";
+        } else {
+            errorText.style.display = "block";
+        }
+    }
+</script>
+</body>
+</html>
