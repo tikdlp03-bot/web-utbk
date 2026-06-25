@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - SIM UTBK</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load Chart.js untuk Fitur Bisnis Cerdas (BI) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container admin-container">
+    <header>
+        <h1>PANEL KONTROL ADMIN - SIM UTBK</h1>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Lihat Halaman Ujian</button>
+    </header>
+
+    <!-- ROW 1: KARTU INFORMASI UTAMA (BI STATS) -->
+    <div class="stats-grid">
+        <div class="card bg-blue">
+            <h3>Total Peserta</h3>
+            <h2 id="stat-total">4</h2>
+        </div>
+        <div class="card bg-green">
+            <h3>Rata-rata Skor</h3>
+            <h2 id="stat-avg">550</h2>
+        </div>
+        <div class="card bg-yellow">
+            <h3>Sedang Ujian</h3>
+            <h2 id="stat-active">0</h2>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <!-- SISI KIRI: MANAJEMEN DATA PESERTA (CRUD) -->
+        <div class="quiz-section">
+            <h2>Kelola Akun Peserta</h2>
+            
+            <!-- Form Tambah Peserta -->
+            <div class="form-box">
+                <input type="text" id="input-nama" placeholder="Nama Lengkap">
+                <input type="text" id="input-username" placeholder="Username">
+                <input type="password" id="input-password" placeholder="Password">
+                <button class="btn btn-primary" onclick="tambahPesertaLocal()">Tambah Peserta</button>
+            </div>
+
+            <!-- Tabel Daftar Peserta -->
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Peserta</th>
+                        <th>Username</th>
+                        <th>Password</th>
+                        <th>Skor</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabel-peserta-body">
+                    <!-- Data akan di-render oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SISI KANAN: GRAFIK BI (VISUALISASI DATA) -->
+        <div class="sidebar admin-sidebar">
+            <h3>Analisis Nilai</h3>
+            <div class="chart-container">
+                <canvas id="biChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- JAVASCRIPT LOKAL UNTUK MOCKUP DATA ADMIN ---
+    
+    // Data dummy awal peserta simulasi
+    let dataPeserta = [
+        { nama: "Budi Santoso", user: "budi123", pass: "rahasia", skor: 750 },
+        { nama: "Siti Aminah", user: "siti2026", pass: "utbk26", skor: 500 },
+        { nama: "Rian Hidayat", user: "rianhd", pass: "pass123", skor: 250 },
+        { nama: "Alya Putri", user: "alyap", pass: "putri99", skor: 700 }
+    ];
+
+    function renderTabel() {
+        const tbody = document.getElementById("tabel-peserta-body");
+        tbody.innerHTML = "";
+        
+        let totalSkor = 0;
+
+        dataPeserta.forEach((p, indeks) => {
+            totalSkor += p.skor;
+            const row = `
+                <tr>
+                    <td>${indeks + 1}</td>
+                    <td><b>${p.nama}</b></td>
+                    <td><code>${p.user}</code></td>
+                    <td>••••••</td>
+                    <td><span class="badge-skor">${p.skor}</span></td>
+                    <td>
+                        <button class="btn-action btn-del" onclick="hapusPeserta(${indeks})">Hapus</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+
+        // Update Statistik Kartu Atas
+        document.getElementById("stat-total").innerText = dataPeserta.length;
+        let avg = dataPeserta.length > 0 ? Math.round(totalSkor / dataPeserta.length) : 0;
+        document.getElementById("stat-avg").innerText = avg;
+
+        // Update Grafik BI
+        updateGrafik();
+    }
+
+    function tambahPesertaLocal() {
+        const nama = document.getElementById("input-nama").value;
+        const user = document.getElementById("input-username").value;
+        const pass = document.getElementById("input-password").value;
+
+        if(nama && user && pass) {
+            dataPeserta.push({ nama: nama, user: user, pass: pass, skor: 0 });
+            renderTabel();
+            
+            // Reset Form Input
+            document.getElementById("input-nama").value = "";
+            document.getElementById("input-username").value = "";
+            document.getElementById("input-password").value = "";
+        } else {
+            alert("Harap isi semua kolom formulir!");
+        }
+    }
+
+    function hapusPeserta(indeks) {
+        dataPeserta.splice(indeks, 1);
+        renderTabel();
+    }
+
+    // --- INTEGRASI CHART.JS (BUSINESS INTELLIGENCE) ---
+    let grafikSaya;
+    function updateGrafik() {
+        const ctx = document.getElementById('biChart').getContext('2d');
+        
+        // Ambil nama dan skor untuk grafik
+        const labelNama = dataPeserta.map(p => p.nama);
+        const nilaiSkor = dataPeserta.map(p => p.skor);
+
+        if (grafikSaya) { grafikSaya.destroy(); } // Reset grafik jika ada update data
+
+        grafikSaya = new Chart(ctx, {
+            type: 'bar', // Jenis grafik batang
+            data: {
+                labels: labelNama,
+                datasets: [{
+                    label: 'Skor UTBK Peserta',
+                    data: nilaiSkor,
+                    backgroundColor: '#1e3a8a',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 1000 }
+                }
+            }
+        });
+    }
+
+    // Jalankan render tabel saat halaman dibuka
+    window.onload = renderTabel;
+</script>
+</body>
+</html>
