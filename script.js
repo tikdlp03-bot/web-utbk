@@ -1,142 +1,141 @@
-// Database Soal (Kita tambah jadi 4 soal untuk contoh grid)
-const quizData = [
-    { question: "Jika x + 3 = 7, maka nilai dari 2x + 1 adalah...", options: ["7", "9", "11", "13"], correct: 1 },
-    { question: "Semua mahasiswa memakai jaket almamater...", options: ["A", "B", "C", "D"], correct: 0 },
-    { question: "Nilai dari 50% dari 200 adalah...", options: ["50", "100", "150", "200"], correct: 1 },
-    { question: "Lanjutan pola bilangan: 2, 4, 8, 16, ...", options: ["20", "24", "32", "64"], correct: 2 }
+// Data Soal UTBK
+const daftarSoal = [
+    { q: "Jika x + 5 = 12, berapakah nilai dari 3x - 2?", info: ["19", "21", "23", "25"], ans: 0 },
+    { q: "Semua unggas bertelur. Buaya bertelur. Kesimpulan yang tepat adalah...", info: ["Buaya adalah unggas", "Unggas adalah buaya", "Buaya dan unggas sama", "Tidak dapat disimpulkan hubungan buaya dan unggas"], ans: 3 },
+    { q: "Manakah kata yang penulisan ejaannya TIDAK BAKU?", info: ["Aktivitas", "Analisa", "Karier", "Apotek"], ans: 1 },
+    { q: "Pola bilangan: 3, 6, 12, 24, ... Angka selanjutnya adalah...", info: ["30", "36", "48", "60"], ans: 2 }
 ];
 
-let currentQuestionIndex = 0;
-let userAnswers = new Array(quizData.length).fill(null); // Menyimpan jawaban user (null = belum dijawab)
-let doubtfulAnswers = new Array(quizData.length).fill(false); // Menyimpan status ragu-ragu
-let timeLeft = 120;
+let indeksSekarang = 0;
+let jawabanUser = new Array(daftarSoal.length).fill(null); 
+let statusRagu = new Array(daftarSoal.length).fill(false); 
+let sisaWaktu = 300; // 5 Menit
 
-// Inisialisasi Grid Nomor di Sidebar
-function createGrid() {
-    const gridContainer = document.getElementById("question-grid");
-    gridContainer.innerHTML = "";
+// Membuat Grid Nomor di Kanan
+function bangunGridNomor() {
+    const gridBox = document.getElementById("number-grid");
+    gridBox.innerHTML = "";
     
-    quizData.forEach((_, index) => {
-        const button = document.createElement("button");
-        button.innerText = index + 1;
-        button.classList.add("grid-item");
-        button.id = `grid-${index}`;
-        button.onclick = () => jumpToQuestion(index);
-        gridContainer.appendChild(button);
+    daftarSoal.forEach((_, indeks) => {
+        const tombolNomor = document.createElement("button");
+        tombolNomor.innerText = indeks + 1;
+        tombolNomor.classList.add("grid-item");
+        tombolNomor.id = `grid-no-${indeks}`;
+        tombolNomor.onclick = () => lompatKeSoal(indeks);
+        gridBox.appendChild(tombolNomor);
     });
 }
 
-function updateGridStatus() {
-    quizData.forEach((_, index) => {
-        const gridItem = document.getElementById(`grid-${index}`);
-        gridItem.classList.remove("active", "answered", "doubtful");
+// Update Warna Grid Berdasarkan Status
+function perbaruiWarnaGrid() {
+    daftarSoal.forEach((_, indeks) => {
+        const elemenGrid = document.getElementById(`grid-no-${indeks}`);
+        elemenGrid.classList.remove("active", "answered", "doubtful");
 
-        if (index === currentQuestionIndex) gridItem.classList.add("active");
-        
-        // Aturan Warna UTBK
-        if (doubtfulAnswers[index]) {
-            gridItem.classList.add("doubtful"); // Kuning mendominasi jika ragu
-        } else if (userAnswers[index] !== null) {
-            gridItem.classList.add("answered"); // Hijau jika diisi & tidak ragu
+        if (indeks === indeksSekarang) {
+            elemenGrid.classList.add("active");
+        }
+
+        if (statusRagu[indeks]) {
+            elemenGrid.classList.add("doubtful"); 
+        } else if (jawabanUser[indeks] !== null) {
+            elemenGrid.classList.add("answered"); 
         }
     });
 }
 
-function loadQuiz() {
-    if (currentQuestionIndex >= 0 && currentQuestionIndex < quizData.length) {
-        const currentQuiz = quizData[currentQuestionIndex];
-        document.getElementById("q-num").innerText = currentQuestionIndex + 1;
-        document.getElementById("question-text").innerText = currentQuiz.question;
-        
-        document.getElementById("optA").innerText = currentQuiz.options[0];
-        document.getElementById("optB").innerText = currentQuiz.options[1];
-        document.getElementById("optC").innerText = currentQuiz.options[2];
-        document.getElementById("optD").innerText = currentQuiz.options[3];
+// Menampilkan Soal Aktif
+function tampilkanSoal() {
+    const soalAktif = daftarSoal[indeksSekarang];
+    document.getElementById("current-num").innerText = indeksSekarang + 1;
+    document.getElementById("question-text").innerText = soalAktif.q;
 
-        // Reset & pasang status tombol pilihan yang sudah pernah dipilih
-        resetOptionStyles();
-        if (userAnswers[currentQuestionIndex] !== null) {
-            document.getElementById(`btn-${userAnswers[currentQuestionIndex]}`).classList.add("selected");
-        }
-
-        // Pasang status checkbox ragu-ragu
-        document.getElementById("doubtful-checkbox").checked = doubtfulAnswers[currentQuestionIndex];
-        
-        updateGridStatus();
-    }
-}
-
-function selectAnswer(selectedIndex) {
-    userAnswers[currentQuestionIndex] = selectedIndex;
-    resetOptionStyles();
-    document.getElementById(`btn-${selectedIndex}`).classList.add("selected");
-    updateGridStatus();
-}
-
-function toggleDoubtful() {
-    const isChecked = document.getElementById("doubtful-checkbox").checked;
-    doubtfulAnswers[currentQuestionIndex] = isChecked;
-    updateGridStatus();
-}
-
-function resetOptionStyles() {
     for (let i = 0; i < 4; i++) {
-        document.getElementById(`btn-${i}`).classList.remove("selected");
+        document.getElementById(`text-${i}`).innerText = soalAktif.info[i];
+        document.getElementById(`opt-${i}`).classList.remove("selected");
     }
-}
 
-function jumpToQuestion(index) {
-    currentQuestionIndex = index;
-    loadQuiz();
-}
-
-function nextQuestion() {
-    if (currentQuestionIndex < quizData.length - 1) {
-        currentQuestionIndex++;
-        loadQuiz();
+    if (jawabanUser[indeksSekarang] !== null) {
+        document.getElementById(`opt-${jawabanUser[indeksSekarang]}`).classList.add("selected");
     }
+
+    document.getElementById("ragu-checkbox").checked = statusRagu[indeksSekarang];
+    perbaruiWarnaGrid();
 }
 
-function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        loadQuiz();
-    }
-}
-
-// Hitung Skor Akhir Saat Selesai
-function calculateScore() {
-    let finalScore = 0;
-    userAnswers.forEach((answer, index) => {
-        if (answer === quizData[index].correct) {
-            finalScore += 25; // 4 soal x 25 = nilai 100
-        }
-    });
-    return finalScore;
-}
-
-function endQuiz() {
-    clearInterval(countdown);
-    document.getElementById("quiz-box").classList.add("hidden");
-    document.getElementById("quiz-footer").classList.add("hidden");
-    document.getElementById("sidebar-container").classList.add("hidden");
-    document.getElementById("timer").classList.add("hidden");
+// Logika Pilihan Jawaban
+function pilihJawaban(indeksOpsi) {
+    jawabanUser[indeksSekarang] = indeksOpsi;
     
-    const resultBox = document.getElementById("result-box");
-    resultBox.classList.remove("hidden");
-    document.getElementById("score-text").innerText = `Total Skor Anda: ${calculateScore()}`;
+    for (let i = 0; i < 4; i++) {
+        document.getElementById(`opt-${i}`).classList.remove("selected");
+    }
+    document.getElementById(`opt-${indeksOpsi}`).classList.add("selected");
+
+    perbaruiWarnaGrid();
 }
 
-// Timer
-const countdown = setInterval(() => {
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    document.getElementById("time").innerText = `${minutes}:${seconds}`;
-    timeLeft--;
-    if (timeLeft < 0) endQuiz();
+function tentukanRagu() {
+    const ceklis = document.getElementById("ragu-checkbox").checked;
+    statusRagu[indeksSekarang] = ceklis;
+    perbaruiWarnaGrid();
+}
+
+function lompatKeSoal(indeksTarget) {
+    indeksSekarang = indeksTarget;
+    tampilkanSoal();
+}
+
+function soalBerikutnya() {
+    if (indeksSekarang < daftarSoal.length - 1) {
+        indeksSekarang++;
+        tampilkanSoal();
+    }
+}
+
+function soalSebelumnya() {
+    if (indeksSekarang > 0) {
+        indeksSekarang--;
+        tampilkanSoal();
+    }
+}
+
+// Timer Hitung Mundur
+const hitungMundur = setInterval(() => {
+    let menit = Math.floor(sisaWaktu / 60);
+    let detik = sisaWaktu % 60;
+    
+    detik = detik < 10 ? '0' + detik : detik;
+    document.getElementById("time-display").innerText = `${menit}:${detik}`;
+    
+    sisaWaktu--;
+
+    if (sisaWaktu < 0) {
+        clearInterval(hitungMundur);
+        selesaiUjian();
+    }
 }, 1000);
 
-// Jalankan Pertama Kali
-createGrid();
-loadQuiz();
+// Selesai Ujian
+function selesaiUjian() {
+    clearInterval(hitungMundur);
+    
+    let totalBenar = 0;
+    jawabanUser.forEach((jawaban, indeks) => {
+        if (jawaban === daftarSoal[indeks].ans) {
+            totalBenar++;
+        }
+    });
+
+    let skorAkhir = Math.round((totalBenar / daftarSoal.length) * 1000);
+
+    document.getElementById("quiz-layout").classList.add("hidden");
+    document.getElementById("timer").classList.add("hidden");
+    
+    document.getElementById("result-box").classList.remove("hidden");
+    document.getElementById("score-text").innerText = skorAkhir;
+}
+
+// Jalankan fungsi awal saat file diload
+bangunGridNomor();
+tampilkanSoal();
